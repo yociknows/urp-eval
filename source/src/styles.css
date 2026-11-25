@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@theme {
+  --color-oat-50: #fbf9f5;
+  --color-oat-100: #f4f1ea;
+  --color-oat-200: #e8e2d6;
+  --color-oat-300: #d7cdbb;
+  --color-navy-500: #34557d;
+  --color-navy-600: #2a4769;
+  --color-navy-700: #213a58;
+  --color-navy-800: #1a2e47;
+  --color-navy-900: #121f33;
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+}
+html, body { background: var(--color-oat-100); }
+input[type=checkbox] { accent-color: var(--color-navy-700); width: 15px; height: 15px; }
+@page { size: A4 portrait; margin: 9mm; }
+@media print {
+  html, body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #print-report { width: 192mm; }
+}

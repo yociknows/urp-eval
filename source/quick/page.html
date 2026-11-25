@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>都更快篩</title>
+<style>
+/* VOICE 冷靜、像估價單；IDEA 口袋裡的開發判斷卡；PICTURE 頂端大型判斷燈號卡；COLOUR 白底、深藍主色、綠紅燈號；TYPE Noto Sans TC 四級字；LAYOUT 單欄手機優先 */
+:root{color-scheme:light dark;--bg:light-dark(#f6f4ef,#0f1622);--card:light-dark(#fff,#18212f);--ink:light-dark(#1a2333,#e9edf3);--mute:light-dark(#6b7280,#9aa4b2);--line:light-dark(#e6e1d6,#2a3445);--navy:light-dark(#1c3350,#9fb8d9);--go:#059669;--mid:#d97706;--no:#dc2626}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:520px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:20px;margin:4px 0 2px;color:var(--navy)}
+.sub{color:var(--mute);font-size:13px;margin:0 0 14px}
+.verdict{border-radius:18px;padding:18px;color:#fff;box-shadow:0 8px 24px rgb(0 0 0/.12);transition:background .3s}
+.verdict.go{background:linear-gradient(160deg,#059669,#047857)}.verdict.mid{background:linear-gradient(160deg,#d97706,#b45309)}.verdict.no{background:linear-gradient(160deg,#dc2626,#b91c1c)}
+#vt{font-size:26px;font-weight:800;line-height:1.15}#vs{font-size:14px;opacity:.95;margin-top:4px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.metric{background:rgb(255 255 255/.16);border-radius:12px;padding:10px 12px}
+.metric small{display:block;font-size:12px;opacity:.9}.metric b{font-size:24px;font-variant-numeric:tabular-nums}
+.metric.bad b::after{content:" ✗";font-size:14px}.metric.ok b::after{content:" ✓";font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:14px}
+.field{padding:10px 0;border-bottom:1px solid var(--line)}.field:last-child{border:0}
+.field label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:6px}.field label span{color:var(--mute);font-weight:400}
+.stepper{display:grid;grid-template-columns:48px 1fr 48px;gap:8px}
+.stepper button{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--navy);font-size:22px;cursor:pointer}
+.stepper input{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.stepper input:focus,button:focus-visible{outline:2px solid var(--navy);outline-offset:1px}
+.chips{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.chips button{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;cursor:pointer}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.seg button{min-height:52px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:18px;font-weight:700;cursor:pointer;line-height:1.1}.seg button small{display:block;font-size:11px;font-weight:400;color:var(--mute)}.seg button.on{background:var(--navy);color:light-dark(#fff,#0f1622);border-color:var(--navy)}.seg button.on small{color:light-dark(#dbe4f0,#1c3350)}
+.adv{margin-top:6px;border-top:1px solid var(--line);padding-top:8px}.adv summary{min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--navy);cursor:pointer}
+.zsel{width:100%;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:17px;padding:0 12px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.cf label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:4px}.cf label span{color:var(--mute);font-weight:400;font-size:11px}
+.cstep{display:grid;grid-template-columns:36px 1fr 36px;gap:4px}
+.cstep button{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--navy);font-size:18px;cursor:pointer}
+.cstep input{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;width:100%}
+.csum{height:44px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.hint b{color:var(--navy);font-size:14px}
+.hint{font-size:12px;color:var(--mute);margin-top:4px}
+.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}.row:last-child{border:0}.row small{display:block;font-size:11px;color:var(--mute)}.row b{font-variant-numeric:tabular-nums}
+h2{font-size:15px;margin:0 0 4px;color:var(--navy)}
+.note{font-size:12px;color:var(--mute);margin-top:12px;line-height:1.6}
+.reset{margin-top:10px;width:100%;min-height:44px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--mute);font-size:14px;cursor:pointer}
+.mini{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 16px;color:#fff;font-size:14px;transform:translateY(-100%);opacity:0;transition:.2s;margin-bottom:-44px}
+.mini.show{transform:none;opacity:1}.mini.go{background:#047857}.mini.mid{background:#b45309}.mini.no{background:#b91c1c}.mini b{font-size:16px}#mi-v{font-weight:700}
+@media(prefers-reduced-motion:reduce){.verdict{transition:none}}
+</style></head><body>
+<div id="mini" class="mini"><span id="mi-v">—</span><span>換 <b id="mi-s">—</b></span><span>投報 <b id="mi-r">—</b></span></div>
+<div class="wrap">
+  <h1>都更快篩</h1>
+  <p class="sub">在現場選構造、填幾個數字，30 秒判斷值不值得進場。</p>
+  <section id="verdict" class="verdict">
+    <div id="vt">—</div><div id="vs"></div>
+    <div class="metrics">
+      <div class="metric"><small>室內一坪換</small><b id="m-swap">—</b></div>
+      <div class="metric"><small>投報率（目標 20%）</small><b id="m-roi">—</b></div>
+      <div class="metric"><small>建議分配比例</small><b id="m-sweet" style="font-size:17px;white-space:nowrap;letter-spacing:-.3px">—</b><small id="m-floor" style="margin-top:2px;opacity:.85"></small></div>
+      <div class="metric"><small>總銷坪</small><b id="m-sales" style="font-size:20px">—</b></div>
+    </div>
+  </section>
+  <section class="card"><div class="field"><label>構造<span>影響法定造價、設計費</span></label><div id="struct" class="seg"></div></div><div id="fields"></div><details class="adv"><summary>進階設定（利率、工期、融資、費率、車位、法定造價）</summary><div id="adv"></div><button id="saveDef" class="reset" type="button" style="color:var(--navy);font-weight:700">把目前進階設定存成我的預設</button></details><button id="copyIn" class="reset" type="button" style="color:var(--navy);font-weight:700">複製目前輸入（傳給 Claude 檢查）</button><button id="reset" class="reset" type="button">恢復預設值</button></section>
+  <section class="card"><h2>預估建築規模</h2><div id="scale"></div></section>
+  <section class="card"><h2>估算明細</h2><div id="detail"></div>
+    <p class="note">與桌機版同一套公式。未輸入項目用預設值粗估：容移自購道路地／代金各半、開挖率 70%、建築係數 1.58、新房公設比 35%、舊建物公設 10%。結果僅供初步判斷，進場前請用桌機版細算。</p>
+  </section>
+</div>
+<script>/*APP*/</script>
+</body></html>
